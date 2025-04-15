@@ -1,0 +1,17 @@
+/* Element Variables */
+
+// Override Element UI variables
+$--color-primary: #067288;
+$--color-success: #30B08F;
+$--color-warning: #FEC171;
+$--color-danger: #C03639;
+$--color-info: #0099b9;
+$--color-text-primary: #333333;
+
+$--color-text-regular: #333333;
+$--color-text-secondary: #555555;
+
+// The :export directive is the magic sauce for webpack
+:export {
+  theme: $--color-primary;
+} 

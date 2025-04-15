@@ -1,0 +1,491 @@
+@import './variables.scss';
+@import './mixin.scss';
+@import './transition.scss';
+@import './sidebar.scss';
+
+body {
+  height: 100%;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-family: Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif;
+  color: $textColor;
+}
+
+label {
+  font-weight: 700;
+}
+
+html {
+  height: 100%;
+  box-sizing: border-box;
+}
+
+#app {
+  height: 100%;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+a:focus,
+a:active {
+  outline: none;
+}
+
+a,
+a:focus,
+a:hover {
+  cursor: pointer;
+  color: inherit;
+  text-decoration: none;
+}
+
+div:focus {
+  outline: none;
+}
+
+.clearfix {
+  &:after {
+    visibility: hidden;
+    display: block;
+    font-size: 0;
+    content: " ";
+    clear: both;
+    height: 0;
+  }
+}
+
+// Override ElementUI default menu styles
+.el-menu {
+  .el-menu-item, .el-submenu__title {
+    color: #ffffff !important;
+  }
+  
+  .el-submenu__icon-arrow {
+    color: #ffffff !important;
+  }
+  
+  // Ensure all icons remain white
+  [class^="el-icon-"], .svg-icon {
+    color: #ffffff !important;
+  }
+}
+
+// Parent menu with submenu gets special background when child is active
+.el-submenu.is-active > .el-submenu__title {
+  background-color: $menuHover !important; // #0099b9
+}
+
+// Custom styles for active menu items
+.el-menu-item.is-active {
+  background-color: $menuHover !important;
+  color: $menuActiveText !important;
+}
+
+.el-submenu.is-active {
+  .el-menu-item.is-active {
+    background-color: $subMenuActive !important; // rgb(6, 64, 74)
+    color: $menuActiveText !important;
+  }
+}
+
+// main-container global css
+.app-container {
+  //padding: 20px;
+}
+
+// 折叠菜单时的图标居中样式
+.hideSidebar {
+  .el-menu--collapse {
+    [class^="el-icon-"] {
+      display: inline-block;
+      width: 100%;
+      text-align: center;
+    }
+    
+    .svg-icon {
+      margin: 0 !important;
+      display: inline-block;
+      width: 100%;
+      text-align: center;
+    }
+    
+    .sub-el-icon {
+      margin: 0 !important;
+      display: inline-block;
+      width: 100%;
+      text-align: center;
+    }
+  }
+}
+
+// 全局强制覆盖 Element UI 主题色
+.el-button--primary {
+  background-color: $blue !important;
+  border-color: $blue !important;
+}
+
+// 添加按钮悬停和焦点状态
+.el-button--primary:hover,
+.el-button--primary:focus {
+  background-color: lighten($blue, 10%) !important;
+  border-color: lighten($blue, 10%) !important;
+}
+
+// 默认按钮悬停
+.el-button--default:hover,
+.el-button--default:focus {
+  color: $blue !important;
+  border-color: lighten($blue, 15%) !important;
+  background-color: rgba(6, 114, 136, 0.1) !important;
+}
+
+.el-pagination.is-background .el-pager li:not(.disabled).active {
+  background-color: $blue !important;
+}
+
+.el-checkbox__input.is-checked .el-checkbox__inner,
+.el-checkbox__input.is-indeterminate .el-checkbox__inner {
+  background-color: $blue !important;
+  border-color: $blue !important;
+}
+
+.el-radio__input.is-checked .el-radio__inner {
+  background-color: $blue !important;
+  border-color: $blue !important;
+}
+
+.el-switch.is-checked .el-switch__core {
+  border-color: $blue !important;
+  background-color: $blue !important;
+}
+
+.el-slider__bar {
+  background-color: $blue !important;
+}
+
+.el-slider__button {
+  border-color: $blue !important;
+}
+
+.el-select .el-input.is-focus .el-input__inner {
+  border-color: $blue !important;
+}
+
+.el-input.is-active .el-input__inner, 
+.el-input__inner:focus,
+.el-textarea__inner:focus {
+  border-color: $blue !important;
+}
+
+// 日期和时间选择器组件样式
+.el-date-table td.today span,
+.el-date-table td.available:hover,
+.el-date-picker__header-label:hover,
+.el-picker-panel__icon-btn:hover {
+  color: $blue !important;
+}
+
+// 日期选择器其他状态
+.el-date-picker__header-label.active,
+.el-time-panel__btn.confirm,
+.el-time-spinner__arrow:hover,
+.el-time-spinner__item:hover,
+.el-year-table td.today .cell,
+.el-year-table td:hover .cell,
+.el-year-table td.current:not(.disabled) .cell,
+.el-month-table td.today .cell,
+.el-month-table td:hover .cell,
+.el-month-table td.current:not(.disabled) .cell {
+  color: $blue !important;
+}
+
+// 日期选择器当前选中日期
+.el-date-table td.current:not(.disabled) span,
+.el-date-table td.end-date span, 
+.el-date-table td.start-date span,
+.el-date-table td.selected span,
+.el-time-panel__content .el-time-spinner__list .el-time-spinner__item.active,
+.el-time-panel__btn.confirm:hover {
+  background-color: $blue !important;
+  color: #fff !important;
+}
+
+// 日期输入框
+.el-date-editor--daterange.is-active,
+.el-date-editor--datetimerange.is-active,
+.el-date-editor--timerange.is-active,
+.el-date-editor.el-input__inner:focus,
+.el-date-editor.el-input__inner:hover {
+  border-color: $blue !important;
+}
+
+// 日期范围选择器
+.el-range-editor.is-active,
+.el-range-editor.is-active:hover {
+  border-color: $blue !important;
+}
+
+.el-range-editor .el-range-input:focus {
+  color: $blue !important;
+}
+
+.el-tag--primary {
+  background-color: rgba(6, 114, 136, 0.1);
+  border-color: rgba(6, 114, 136, 0.2);
+  color: $blue;
+}
+
+.el-tag--primary.is-hit {
+  border-color: $blue;
+}
+
+.el-tabs__active-bar {
+  background-color: $blue !important;
+}
+
+.el-tabs__item.is-active {
+  color: $blue !important;
+}
+
+.el-upload--picture-card:hover, 
+.el-upload:focus {
+  border-color: $blue !important;
+  color: $blue !important;
+}
+
+.el-dropdown-menu__item:focus, 
+.el-dropdown-menu__item:not(.is-disabled):hover {
+  background-color: rgba(6, 114, 136, 0.1) !important;
+  color: $blue !important;
+}
+
+// Select 下拉选择器的样式
+.el-select-dropdown__item.selected {
+  color: $blue !important;
+}
+
+.el-select-dropdown__item.hover, 
+.el-select-dropdown__item:hover {
+  background-color: rgba(6, 114, 136, 0.1) !important;
+}
+
+.el-select .el-input__inner:focus {
+  border-color: $blue !important;
+}
+
+// 链接元素主题色设置
+.el-link.el-link--primary {
+  color: $blue !important;
+  
+  &:hover {
+    color: lighten($blue, 10%) !important;
+  }
+  
+  &:active {
+    color: darken($blue, 10%) !important;
+  }
+  
+  &.is-disabled {
+    color: rgba(6, 114, 136, 0.5) !important;
+  }
+}
+
+// 链接图标颜色
+.el-link.el-link--primary .el-link__inner [class^="el-icon-"] {
+  color: $blue !important;
+}
+
+// 默认链接颜色
+.el-link.el-link--default:hover {
+  color: $blue !important;
+}
+
+// 链接下划线
+.el-link.el-link--primary.is-underline:hover:after,
+.el-link.el-link--primary:after {
+  border-color: $blue !important;
+}
+
+// 面包屑链接
+.el-breadcrumb__inner a, 
+.el-breadcrumb__inner.is-link {
+  color: $blue !important;
+  font-weight: normal;
+  
+  &:hover {
+    color: lighten($blue, 10%) !important;
+  }
+}
+
+// ElementUI 组件内部的链接
+.el-table a,
+.el-form a,
+.el-dialog a,
+.el-card a,
+.el-dropdown-menu a,
+.el-message a,
+.el-message-box a,
+.el-notification a,
+.el-popover a,
+.el-time-panel a {
+  color: $blue !important;
+  text-decoration: none;
+  
+  &:hover {
+    color: lighten($blue, 10%) !important;
+    text-decoration: underline;
+  }
+}
+
+// 确保所有Element UI组件使用small尺寸
+.el-form--default,
+.el-form-item__label,
+.el-button:not(.el-button--mini):not(.el-button--medium):not(.el-button--large),
+.el-input__inner,
+.el-input-number__decrease, 
+.el-input-number__increase,
+.el-date-editor.el-input, 
+.el-date-editor--date,
+.el-select .el-input,
+.el-table,
+.el-radio__label,
+.el-checkbox__label,
+.el-dialog__title,
+.el-message-box__title,
+.el-pagination,
+.el-tabs__item {
+  font-size: 13px !important;
+}
+
+.el-form-item {
+  margin-bottom: 18px;
+}
+
+.el-table th {
+  padding: 8px 0;
+}
+
+.el-table td {
+  padding: 6px 0;
+}
+
+// 按钮中的文本链接
+.el-button--text {
+  color: $blue !important;
+  
+  &:hover {
+    color: lighten($blue, 10%) !important;
+  }
+  
+  &:active {
+    color: darken($blue, 10%) !important;
+  }
+  
+  &.is-disabled {
+    color: rgba(6, 114, 136, 0.5) !important;
+  }
+}
+
+// 其他 Element UI 组件中可能出现的链接，如导航菜单
+.el-menu:not(.el-menu--dark) .el-menu-item a {
+  color: $blue !important;
+}
+
+// 弹窗中的链接文本按钮
+.el-message-box__btns button.el-button--text,
+.el-dialog__footer button.el-button--text {
+  color: $blue !important;
+}
+
+// 标签页链接悬停颜色
+.el-tabs__item:hover {
+  color: $blue !important;
+}
+
+// 对话框和消息框样式
+.el-message-box__btns button.el-button--primary,
+.el-dialog__footer button.el-button--primary {
+  background-color: $blue !important;
+  border-color: $blue !important;
+  
+  &:hover, &:focus {
+    background-color: lighten($blue, 10%) !important;
+    border-color: lighten($blue, 10%) !important;
+  }
+}
+
+// 消息提示和通知样式
+.el-message--success,
+.el-notification--success {
+  background-color: rgba(6, 114, 136, 0.1) !important;
+  border-color: rgba(6, 114, 136, 0.2) !important;
+  
+  .el-message__icon,
+  .el-notification__icon,
+  .el-message__content,
+  .el-notification__title {
+    color: $blue !important;
+  }
+}
+
+// 表格行悬停颜色
+.el-table__body tr.hover-row > td.el-table__cell,
+.el-table__body tr:hover > td.el-table__cell {
+  background-color: rgba(6, 114, 136, 0.1) !important;
+}
+
+// 树形控件
+.el-tree-node:focus > .el-tree-node__content,
+.el-tree-node__content:hover {
+  background-color: rgba(6, 114, 136, 0.1) !important;
+}
+
+.el-tree--highlight-current .el-tree-node.is-current > .el-tree-node__content {
+  background-color: rgba(6, 114, 136, 0.2) !important;
+}
+
+// 级联选择器
+.el-cascader-node.in-active-path, 
+.el-cascader-node.is-active, 
+.el-cascader-node.is-selectable.in-checked-path {
+  color: $blue !important;
+}
+
+// 颜色选择器
+.el-color-picker__trigger:hover {
+  border-color: $blue !important;
+}
+
+.el-color-dropdown__btn:hover {
+  color: $blue !important;
+}
+
+// 穿梭框
+.el-transfer-panel__item.el-checkbox.is-checked .el-checkbox__label {
+  color: $blue !important;
+}
+
+.el-transfer__button {
+  background-color: $blue !important;
+  border-color: $blue !important;
+  
+  &:hover {
+    background-color: lighten($blue, 10%) !important;
+    border-color: lighten($blue, 10%) !important;
+  }
+}
+
+// 全局统一表单标签样式
+.el-form {
+  .el-form-item__label {
+    &::after {
+      content: ':';
+      margin-right: 4px;
+    }
+  }
+} 

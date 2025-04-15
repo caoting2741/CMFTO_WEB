@@ -1,0 +1,387 @@
+<template>
+  <el-form
+    ref="form"
+    :model="formData"
+    :rules="rules"
+    :label-width="labelWidth"
+    :label-position="labelPosition"
+    :inline="inline"
+    :size="size"
+    :disabled="disabled"
+    :validate-on-rule-change="validateOnRuleChange"
+    :hide-required-asterisk="hideRequiredAsterisk"
+    :status-icon="statusIcon"
+    @submit.native.prevent
+  >
+    <!-- 遍历渲染表单项 -->
+    <el-form-item
+      v-for="(item, index) in formItems"
+      :key="index"
+      :label="item.label"
+      :prop="item.prop"
+      :required="item.required"
+      :rules="item.rules"
+      :error="item.error"
+      :show-message="item.showMessage !== false"
+      :label-width="item.labelWidth"
+      :class="item.className"
+    >
+      <!-- 标签提示信息 -->
+      <template #label v-if="item.tooltip">
+        <span class="form-item-label-with-tooltip">
+          {{ item.label }}
+          <el-tooltip :content="item.tooltip" placement="top" effect="light">
+            <i class="el-icon-question tooltip-icon"></i>
+          </el-tooltip>
+        </span>
+      </template>
+      
+      <!-- 输入框 -->
+      <el-input
+        v-if="item.type === 'input' || !item.type"
+        v-model="formData[item.prop]"
+        :type="item.inputType || 'text'"
+        :placeholder="item.placeholder || `请输入${item.label}`"
+        :disabled="item.disabled || disabled"
+        :readonly="item.readonly"
+        :clearable="item.clearable !== false"
+        :maxlength="item.maxlength"
+        :prefix-icon="item.prefixIcon"
+        :suffix-icon="item.suffixIcon"
+        :show-password="item.showPassword"
+        :show-word-limit="item.showWordLimit"
+        @change="(val) => handleInputChange(val, item)"
+      ></el-input>
+      
+      <!-- 选择框 -->
+      <el-select
+        v-else-if="item.type === 'select'"
+        v-model="formData[item.prop]"
+        :placeholder="item.placeholder || `请选择${item.label}`"
+        :disabled="item.disabled || disabled"
+        :multiple="item.multiple"
+        :clearable="item.clearable !== false"
+        :collapse-tags="item.collapseTags"
+        style="width: 100%"
+        @change="(val) => handleSelectChange(val, item)"
+      >
+        <el-option
+          v-for="option in item.options"
+          :key="option.value"
+          :label="option.label"
+          :value="option.value"
+          :disabled="option.disabled"
+        ></el-option>
+      </el-select>
+      
+      <!-- 单选框组 -->
+      <el-radio-group
+        v-else-if="item.type === 'radio'"
+        v-model="formData[item.prop]"
+        :disabled="item.disabled || disabled"
+        @change="(val) => handleRadioChange(val, item)"
+      >
+        <el-radio
+          v-for="option in item.options"
+          :key="option.value"
+          :label="option.value"
+          :disabled="option.disabled"
+        >{{ option.label }}</el-radio>
+      </el-radio-group>
+      
+      <!-- 复选框组 -->
+      <el-checkbox-group
+        v-else-if="item.type === 'checkbox'"
+        v-model="formData[item.prop]"
+        :disabled="item.disabled || disabled"
+        @change="(val) => handleCheckboxChange(val, item)"
+      >
+        <el-checkbox
+          v-for="option in item.options"
+          :key="option.value"
+          :label="option.value"
+          :disabled="option.disabled"
+        >{{ option.label }}</el-checkbox>
+      </el-checkbox-group>
+      
+      <!-- 开关 -->
+      <el-switch
+        v-else-if="item.type === 'switch'"
+        v-model="formData[item.prop]"
+        :disabled="item.disabled || disabled"
+        :active-text="item.activeText"
+        :inactive-text="item.inactiveText"
+        :active-value="item.activeValue"
+        :inactive-value="item.inactiveValue"
+        @change="(val) => handleSwitchChange(val, item)"
+      ></el-switch>
+      
+      <!-- 日期选择器 -->
+      <el-date-picker
+        v-else-if="item.type === 'date'"
+        v-model="formData[item.prop]"
+        :type="item.dateType || 'date'"
+        :placeholder="item.placeholder || `请选择${item.label}`"
+        :disabled="item.disabled || disabled"
+        :clearable="item.clearable !== false"
+        :value-format="item.valueFormat"
+        :format="item.format"
+        style="width: 100%"
+        @change="(val) => handleDateChange(val, item)"
+      ></el-date-picker>
+      
+      <!-- 日期范围选择器 -->
+      <el-date-picker
+        v-else-if="item.type === 'daterange'"
+        v-model="formData[item.prop]"
+        type="daterange"
+        range-separator="至"
+        start-placeholder="开始日期"
+        end-placeholder="结束日期"
+        :disabled="item.disabled || disabled"
+        :clearable="item.clearable !== false"
+        :value-format="item.valueFormat"
+        :format="item.format"
+        style="width: 100%"
+        @change="(val) => handleDateRangeChange(val, item)"
+      ></el-date-picker>
+      
+      <!-- 数字输入框 -->
+      <el-input-number
+        v-else-if="item.type === 'number'"
+        v-model="formData[item.prop]"
+        :min="item.min"
+        :max="item.max"
+        :step="item.step || 1"
+        :precision="item.precision"
+        :disabled="item.disabled || disabled"
+        :controls="item.controls !== false"
+        style="width: 100%"
+        @change="(val) => handleNumberChange(val, item)"
+      ></el-input-number>
+      
+      <!-- 文本域 -->
+      <el-input
+        v-else-if="item.type === 'textarea'"
+        v-model="formData[item.prop]"
+        type="textarea"
+        :rows="item.rows || 3"
+        :placeholder="item.placeholder || `请输入${item.label}`"
+        :disabled="item.disabled || disabled"
+        :readonly="item.readonly"
+        :maxlength="item.maxlength"
+        :show-word-limit="item.showWordLimit"
+        @change="(val) => handleInputChange(val, item)"
+      ></el-input>
+      
+      <!-- 自定义插槽 -->
+      <slot v-else :name="`form-item-${item.prop}`" :item="item"></slot>
+    </el-form-item>
+    
+    <!-- 表单底部按钮区域 -->
+    <el-form-item v-if="showFooter" class="form-footer">
+      <slot name="footer">
+        <el-button @click="handleReset">{{ resetButtonText }}</el-button>
+        <el-button type="primary" @click="handleSubmit" :loading="submitLoading">{{ submitButtonText }}</el-button>
+      </slot>
+    </el-form-item>
+    
+    <!-- 自定义额外内容 -->
+    <slot name="extra"></slot>
+  </el-form>
+</template>
+
+<script>
+export default {
+  name: 'GlobalForm',
+  props: {
+    // 表单数据对象
+    model: {
+      type: Object,
+      default: () => ({})
+    },
+    // 表单验证规则
+    rules: {
+      type: Object,
+      default: () => ({})
+    },
+    // 表单项配置
+    formItems: {
+      type: Array,
+      default: () => []
+    },
+    // 标签宽度
+    labelWidth: {
+      type: String,
+      default: '100px'
+    },
+    // 标签位置
+    labelPosition: {
+      type: String,
+      default: 'right'
+    },
+    // 表单尺寸
+    size: {
+      type: String,
+      default: 'mini'
+    },
+    // 是否禁用表单
+    disabled: {
+      type: Boolean,
+      default: false
+    },
+    // 是否行内表单
+    inline: {
+      type: Boolean,
+      default: false
+    },
+    // 是否显示底部按钮
+    showFooter: {
+      type: Boolean,
+      default: true
+    },
+    // 重置按钮文本
+    resetButtonText: {
+      type: String,
+      default: '重置'
+    },
+    // 提交按钮文本
+    submitButtonText: {
+      type: String,
+      default: '提交'
+    },
+    // 提交按钮加载状态
+    submitLoading: {
+      type: Boolean,
+      default: false
+    },
+    // 是否隐藏必填字段的星号
+    hideRequiredAsterisk: {
+      type: Boolean,
+      default: false
+    },
+    // 是否显示校验错误信息图标
+    statusIcon: {
+      type: Boolean,
+      default: false
+    },
+    // 是否在rules属性改变后立即触发一次验证
+    validateOnRuleChange: {
+      type: Boolean,
+      default: true
+    }
+  },
+  data() {
+    return {
+      formData: { ...this.model }
+    }
+  },
+  watch: {
+    model: {
+      handler(val) {
+        this.formData = { ...val }
+      },
+      deep: true
+    }
+  },
+  methods: {
+    // 重置表单
+    handleReset() {
+      this.$refs.form.resetFields()
+      this.$emit('reset')
+    },
+    // 提交表单
+    handleSubmit() {
+      this.$refs.form.validate(valid => {
+        if (valid) {
+          this.$emit('submit', this.formData)
+        } else {
+          this.$emit('validate-error')
+          return false
+        }
+      })
+    },
+    // 验证表单
+    validate(callback) {
+      return this.$refs.form.validate(callback)
+    },
+    // 验证表单指定字段
+    validateField(props, callback) {
+      return this.$refs.form.validateField(props, callback)
+    },
+    // 重置表单指定字段
+    resetFields() {
+      this.$refs.form.resetFields()
+    },
+    // 移除表单校验结果
+    clearValidate(props) {
+      this.$refs.form.clearValidate(props)
+    },
+    // 获取表单数据
+    getFormData() {
+      return this.formData
+    },
+    // 设置表单数据
+    setFormData(data) {
+      this.formData = { ...this.formData, ...data }
+    },
+    // 输入框变化事件
+    handleInputChange(val, item) {
+      this.$emit('input-change', val, item.prop, item)
+    },
+    // 选择框变化事件
+    handleSelectChange(val, item) {
+      this.$emit('select-change', val, item.prop, item)
+    },
+    // 单选框变化事件
+    handleRadioChange(val, item) {
+      this.$emit('radio-change', val, item.prop, item)
+    },
+    // 复选框变化事件
+    handleCheckboxChange(val, item) {
+      this.$emit('checkbox-change', val, item.prop, item)
+    },
+    // 开关变化事件
+    handleSwitchChange(val, item) {
+      this.$emit('switch-change', val, item.prop, item)
+    },
+    // 日期变化事件
+    handleDateChange(val, item) {
+      this.$emit('date-change', val, item.prop, item)
+    },
+    // 日期范围变化事件
+    handleDateRangeChange(val, item) {
+      this.$emit('date-range-change', val, item.prop, item)
+    },
+    // 数字变化事件
+    handleNumberChange(val, item) {
+      this.$emit('number-change', val, item.prop, item)
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.form-footer {
+  margin-top: 20px;
+  text-align: right;
+}
+
+.form-item-label-with-tooltip {
+  display: inline-flex;
+  align-items: center;
+  
+  .tooltip-icon {
+    margin-left: 2px;
+    margin-top: -2px;
+    font-size: 13px;
+    color: #909399;
+    cursor: pointer;
+    font-weight: normal;
+    
+    &:hover {
+      color: #067288;
+    }
+  }
+}
+</style> 

@@ -1,0 +1,49 @@
+// base color
+$blue: #067288;
+$light-blue: #0099b9;
+$red: #C03639;
+$pink: #E65D6E;
+$green: #30B08F;
+$tiffany: #4AB7BD;
+$yellow: #FEC171;
+$panGreen: #30B08F;
+
+// text color
+$textColor: #333333;
+
+// sidebar
+$menuText: #ffffff;
+$menuActiveText: #ffffff;
+$subMenuActiveText: #ffffff;
+
+$menuBg: #067288;
+$menuHover: #0099b9;
+
+$subMenuBg: #067288;
+$subMenuHover: #0099b9;
+$subMenuActive: rgb(6, 64, 74);
+
+$sideBarWidth: 210px;
+
+// 添加全局样式变量
+$--form-label-suffix: ':';
+
+// 覆盖Element UI的表单标签样式
+.el-form-item__label::after {
+  content: $--form-label-suffix;
+}
+
+// the :export directive is the magic sauce for webpack
+// https://www.bluematador.com/blog/how-to-share-variables-between-js-and-sass
+:export {
+  menuText: $menuText;
+  menuActiveText: $menuActiveText;
+  subMenuActiveText: $subMenuActiveText;
+  menuBg: $menuBg;
+  menuHover: $menuHover;
+  subMenuBg: $subMenuBg;
+  subMenuHover: $subMenuHover;
+  subMenuActive: $subMenuActive;
+  sideBarWidth: $sideBarWidth;
+  textColor: $textColor;
+} 
