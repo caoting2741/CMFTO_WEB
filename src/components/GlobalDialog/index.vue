@@ -135,10 +135,10 @@ export default {
 
 <style lang="scss" scoped>
 .dialog-footer {
-  text-align: right;
+  text-align: center;
 }
 
-:deep(.el-dialog) {
+/deep/ .el-dialog {
   border-radius: 4px;
   overflow: hidden;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
@@ -146,6 +146,25 @@ export default {
   .el-dialog__header {
     padding: 15px 20px;
     border-bottom: 1px solid #ebeef5;
+    position: relative;
+    
+    // 添加标题前的竖线
+    .el-dialog__title {
+      position: relative;
+      padding-left: 12px;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 16px;
+        background-color: #067288; // 主题色，可以根据需要调整
+        border-radius: 2px;
+      }
+    }
   }
   
   .el-dialog__body {
@@ -157,4 +176,4 @@ export default {
     border-top: 1px solid #ebeef5;
   }
 }
-</style> 
+</style>

@@ -489,3 +489,50 @@ div:focus {
     }
   }
 } 
+.el-message-box__btns {
+  .el-button--primary {
+    color: #fff !important;
+  }
+  
+  // 优化按钮间距
+  .el-button + .el-button {
+    margin-left: 10px;
+  }
+  
+  // 强制所有按钮使用 mini 尺寸
+  .el-button {
+    padding: 7px 15px;
+    font-size: 12px !important;
+    border-radius: 3px;
+    height: 32px;
+    line-height: 1;
+  }
+}
+
+// 确保对话框按钮区域有足够的间距
+.el-message-box__btns {
+  padding: 10px 15px 15px;
+}
+
+// 单选按钮组样式覆盖
+.el-radio-button__inner {
+  &:hover {
+    color: $blue !important;
+    background-color: #fff !important;
+    border-color: $blue !important;
+  }
+}
+
+.el-radio-button__orig-radio:checked + .el-radio-button__inner {
+  background-color: #fff !important;
+  border-color: $blue !important;
+  color: $blue !important;
+  box-shadow: -1px 0 0 0 $blue !important;
+}
+
+// 禁用状态保持原样
+.el-radio-button--mini.is-disabled .el-radio-button__inner {
+  color: #c0c4cc !important;
+  background-color: #f5f7fa !important;
+  border-color: #e4e7ed !important;
+}

@@ -39,11 +39,11 @@ export default {
       return [
         {
           path: '/dashboard',
-          meta: { title: '首页', icon: 'el-icon-s-home' }
+          meta: { title: '首页', icon: 'dashboard' }
         },
         {
           path: '/product',
-          meta: { title: '产品管理', icon: 'el-icon-s-goods' },
+          meta: { title: '产品管理', icon: 'product' },
           children: [
             {
               path: '/product/list',
@@ -53,7 +53,7 @@ export default {
         },
         {
           path: '/device',
-          meta: { title: '设备管理', icon: 'el-icon-cpu' },
+          meta: { title: '设备管理', icon: 'device' },
           children: [
             {
               path: '/device/list',
@@ -63,7 +63,7 @@ export default {
         },
         {
           path: '/data-forward',
-          meta: { title: '数据转发', icon: 'el-icon-connection' },
+          meta: { title: '数据转发', icon: 'forward' },
           children: [
             {
               path: '/data-forward/index',
@@ -73,7 +73,7 @@ export default {
         },
         {
           path: '/params',
-          meta: { title: '参数设置', icon: 'el-icon-setting' },
+          meta: { title: '参数设置', icon: 'setting' },
           children: [
             {
               path: '/params/index',
@@ -83,7 +83,7 @@ export default {
         },
         {
           path: '/log',
-          meta: { title: '日志管理', icon: 'el-icon-document' },
+          meta: { title: '日志管理', icon: 'log' },
           children: [
             {
               path: '/log/cloud',
@@ -101,7 +101,7 @@ export default {
         },
         {
           path: '/system',
-          meta: { title: '系统管理', icon: 'el-icon-s-tools' },
+          meta: { title: '系统管理', icon: 'system' },
           children: [
             {
               path: '/system/user',

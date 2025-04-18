@@ -17,7 +17,11 @@ export default {
     const vnodes = [];
 
     if (icon) {
-      vnodes.push(<i class={[icon, 'sidebar-item-icon']} />);
+      if (icon.includes('el-icon')) {
+        vnodes.push(<i class={[icon, 'sidebar-item-icon']} />);
+      } else {
+        vnodes.push(<svg-icon icon-class={icon} class="sidebar-item-icon" />);
+      }
     }
 
     if (title) {
@@ -32,6 +36,9 @@ export default {
 .sidebar-item-icon {
   display: inline-block;
   width: 24px;
+  height: 24px;
   text-align: center;
+  margin-right: 5px;
+  /* color: #ffffff; */
 }
 </style> 

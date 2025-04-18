@@ -8,7 +8,8 @@ function resolve(dir) {
 // If your port is set to 80,
 // use administrator privileges to execute the command line.
 // For example, Mac: sudo npm run
-const port = 9528; // dev port
+//const port = 9528; // dev port
+const port = 3001; // dev port
 
 // All configuration item explanations can be find in https://cli.vuejs.org/config/
 module.exports = {
@@ -27,19 +28,23 @@ module.exports = {
     proxy: {
       // change xxx-api/login => mock/login
       // detail: https://cli.vuejs.org/config/#devserver-proxy
-      [process.env.VUE_APP_BASE_API]: {
-        target: `http://localhost:${port}/mock`,
+      // [process.env.VUE_APP_BASE_API]: {
+      //   target: `http://159.138.129.71:8090`,
+      //   changeOrigin: true,
+      //   pathRewrite: {
+      //     ['^' + process.env.VUE_APP_BASE_API]: ''
+      //   }
+      // },
+      '/api': {
+        target: 'http://159.138.129.71:8090',
         changeOrigin: true,
-        pathRewrite: {
-          ['^' + process.env.VUE_APP_BASE_API]: ''
-        }
       }
     }
   },
   configureWebpack: {
     // provide the app's title in webpack's name field, so that
     // it can be accessed in index.html to inject the correct title.
-    name: '后台管理系统',
+    name: 'cfmto',
     resolve: {
       alias: {
         '@': resolve('src')
@@ -60,13 +65,14 @@ module.exports = {
     ]);
 
     // when there are many pages, it will cause too many meaningless requests
+    config.plugins.delete('preload');
     config.plugins.delete('prefetch');
-
-    // set svg-sprite-loader
+    // config.module.rules.delete('svg'); 
+    // Load SVG files directly without using svg-sprite-loader
     config.module
       .rule('svg')
       .exclude.add(resolve('src/icons'))
-      .end();
+      .end()
     config.module
       .rule('icons')
       .test(/\.svg$/)
@@ -77,7 +83,8 @@ module.exports = {
       .options({
         symbolId: 'icon-[name]'
       })
-      .end();
+      .end()
+
 
     config
       .when(process.env.NODE_ENV !== 'development',
@@ -86,7 +93,7 @@ module.exports = {
             .plugin('ScriptExtHtmlWebpackPlugin')
             .after('html')
             .use('script-ext-html-webpack-plugin', [{
-            // `runtime` must same as runtimeChunk name. default is `runtime`
+              // `runtime` must same as runtimeChunk name. default is `runtime`
               inline: /runtime\..*\.js$/
             }])
             .end();

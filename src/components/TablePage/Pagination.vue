@@ -12,7 +12,7 @@
         :layout="layout"
         :page-sizes="pageSizes"
         :total="total"
-        :pager-count="6"
+        :pager-count="5"
         @current-change="handleCurrentChange"
         @size-change="handleSizeChange"
         :disabled="disabled"

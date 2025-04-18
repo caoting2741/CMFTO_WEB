@@ -1,6 +1,6 @@
 <template>
   <div class="tab-view">
-    <el-tabs v-model="activeTab" type="card" @tab-click="handleTabClick" class="custom-tabs">
+    <el-tabs size="small" v-model="activeTab" type="card" @tab-click="handleTabClick" class="custom-tabs">
       <el-tab-pane 
         v-for="(tab, index) in tabs" 
         :key="index"
@@ -73,8 +73,10 @@ export default {
     }
     
     :deep(.el-tabs__item) {
-      height: 40px;
-      line-height: 40px;
+      height: 32px;
+      line-height: 32px;
+      font-size: 12px;
+      padding: 0 15px;
       
       &.is-active {
         color: #067288;
@@ -106,9 +108,9 @@ export default {
   .tab-content {
     flex: 1;
     overflow: auto;
-    padding: 16px;
+    padding: 16px 0;
     background-color: #fff;
     box-sizing: border-box;
   }
 }
-</style> 
+</style>

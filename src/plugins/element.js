@@ -53,7 +53,9 @@ import {
   Skeleton,
   SkeletonItem,
   Descriptions,
-  DescriptionsItem
+  DescriptionsItem,
+  Empty,
+  RadioButton
 } from 'element-ui';
 
 // 设置 Element UI 组件全局默认大小为 small
@@ -108,6 +110,8 @@ Vue.use(Skeleton);
 Vue.use(SkeletonItem);
 Vue.use(Descriptions);
 Vue.use(DescriptionsItem);
+Vue.use(Empty);
+Vue.use(RadioButton);
 
 Vue.use(Loading.directive);
 

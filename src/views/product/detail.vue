@@ -6,9 +6,9 @@
           <div class="product-field">
             <div class="field-label">ProductKey</div>
             <div class="field-value">
-              {{ product.productKey }}
+              {{ product.product_key }}
               <el-button class="copy-btn" icon="el-icon-document-copy" type="text"
-                @click="copyToClipboard(product.productKey)">复制</el-button>
+                @click="copyToClipboard(product.product_key)">复制</el-button>
             </div>
           </div>
         </el-col>
@@ -16,11 +16,11 @@
           <div class="product-field">
             <div class="field-label">ProductSecret</div>
             <div class="field-value">
-              {{ showSecret ? product.productSecret : '****************' }}
+              {{ showSecret ? product.product_secret : '****************' }}
               <el-button class="copy-btn" icon="el-icon-view" type="text" @click="toggleSecret">{{ showSecret ? '隐藏' :
                 '查看' }}</el-button>
               <el-button v-if="showSecret" class="copy-btn" icon="el-icon-document-copy" type="text"
-                @click="copyToClipboard(product.productSecret)">复制</el-button>
+                @click="copyToClipboard(product.product_secret)">复制</el-button>
             </div>
           </div>
         </el-col>
@@ -35,13 +35,14 @@
         </div>
         <!-- Topic列表 Tab -->
         <div v-else-if="activeTab === 'topic'" class="tab-pane">
+          <el-radio-group v-model="topicType" size="small" class="topic-type-radio">
+            <el-radio-button :label="1">基础通信Topic</el-radio-button>
+            <el-radio-button :label="2">物模型通信Topic</el-radio-button>
+            <el-radio-button :label="3">自定义Topic</el-radio-button>
+          </el-radio-group>
           <div class="topic-content">
-            <el-table :data="topicList" border style="width: 100%">
-              <el-table-column prop="function" label="功能" width="150" align="center"></el-table-column>
-              <el-table-column prop="topic" label="Topic类" align="center"></el-table-column>
-              <el-table-column prop="operation" label="操作权限" width="120" align="center"></el-table-column>
-              <el-table-column prop="description" label="描述" align="center"></el-table-column>
-            </el-table>
+            <TopicList :topic-type="topicType" v-if="topicType === 1 || topicType === 2" :product-key="product.product_key"></TopicList>
+            <CustomTopic v-if="topicType === 3" :product-key="product.product_key"></CustomTopic>
           </div>
         </div>
         <!-- 功能定义 Tab -->
@@ -57,25 +58,20 @@
 
 <script>
 import EventBus from '@/utils/event-bus'
-
+import { getProduct } from '@/api/dm'
+import TopicList from './topic/topicList.vue'
+import CustomTopic from './topic/customTopic.vue'
 export default {
   name: 'ProductDetail',
+  components: {
+    TopicList,
+    CustomTopic
+  },
   data() {
     return {
       productId: null,
       showSecret: false,
-      product: {
-        id: 1,
-        name: '智能温控器',
-        type: '温控设备',
-        productKey: 'a1csQL7tvf',
-        productSecret: 'eM54HxIMoZGhO2qb',
-        deviceCount: 15,
-        status: 1,
-        createTime: '2023-01-15 14:23:55',
-        updateTime: '2023-05-20 09:18:32',
-        desc: '智能温控器产品是一种可通过网络远程控制的温度调节设备，支持多种传感器接入，可自动根据环境温度变化进行调节，提供智能家居场景联动功能。'
-      },
+      product: {},
       tabs: [
         { name: 'basic', label: '产品详情' },
         { name: 'topic', label: 'Topic定义' },
@@ -83,6 +79,7 @@ export default {
         { name: 'rule', label: '预置规则' }
       ],
       activeTab: 'basic',
+      topicType: 1,
       // 物模型数据
       modelList: [
         {
@@ -155,14 +152,14 @@ export default {
       return [
         { label: '产品ID', value: this.product.id },
         { label: '产品名称', value: this.product.name },
-        { label: '产品类型', value: this.product.type },
-        { label: '动态注册', value: '已开启' },
-        { label: '鉴权类型', value: '设备密钥' },
-        { label: '产品状态', value: this.product.status === 1 ? '已发布' : '开发中' },
-        { label: '在线设备', value: Math.round(this.product.deviceCount * 0.8) + ' 台' },
-        { label: '离线设备', value: Math.round(this.product.deviceCount * 0.2) + ' 台' },        
-        { label: '创建时间', value: this.product.createTime },
-        { label: '产品描述', value: this.product.desc},
+        { label: '产品类型', value: this.product.type ? this.product.type === 1 ? '直连' : '网关' : '' },
+        { label: '动态注册', value: this.product.dynamic_reg === 1 ? '是' : '否' },
+        { label: '鉴权类型', value: this.product.auth_type === 1 ? '密钥认证' : '证书认证' },
+        { label: '产品状态', value: this.product.status === 1 ? '已发布' : '未发布' },
+        { label: '在线设备', value: this.product.device_count },
+        { label: '离线设备', value: this.product.offline_count },
+        { label: '创建时间', value: this.product.create_at },
+        { label: '产品描述', value: this.product.description },
       ]
     }
   },
@@ -179,21 +176,17 @@ export default {
   },
   methods: {
     // 获取产品详情
-    getProductDetail() {
-      // 实际项目中需调用API获取产品详情
-      // 这里使用模拟数据
-      this.product = {
-        id: this.productId,
-        name: '智能温控器',
-        type: '温控设备',
-        productKey: 'a1csQL7tvf',
-        productSecret: 'eM54HxIMoZGhO2qb',
-        deviceCount: 15,
-        status: 1,
-        createTime: '2023-01-15 14:23:55',
-        updateTime: '2023-05-20 09:18:32',
-        desc: '智能温控器产品是一种可通过网络远程控制的温度调节设备，支持多种传感器接入，可自动根据环境温度变化进行调节，提供智能家居场景联动功能。'
+    async getProductDetail() {
+      let product = await getProduct(this.productId)
+      if (product.lenth === 0) {
+        this.$message.error('产品不存在')
+        setTimeout(() => {
+          this.$router.push({ path: '/product/list' })
+        }, 600)
+        return
       }
+      this.product = product[0]
+
     },
     // 处理产品编辑事件
     handleProductEdit(productId) {
@@ -208,7 +201,7 @@ export default {
     },
     // 返回上一页
     goBack() {
-      this.$router.go(-1)
+      this.$router.push('/product/list')
     },
     // 切换显示/隐藏密钥
     toggleSecret() {
@@ -256,10 +249,7 @@ export default {
 }
 
 .product-tabs {
-  // background-color: #fff;
-  // border-radius: 4px;
-  // border: 1px solid #ebeef5;
-  // overflow: hidden;
+
   margin-top: 10px;
   padding: 0 20px;
 }
@@ -270,6 +260,10 @@ export default {
 
 .mt20 {
   margin-top: 20px;
+}
+
+.topic-type-radio {
+  margin-bottom: 16px;
 }
 
 .device-header {

@@ -384,4 +384,51 @@ export default {
     }
   }
 }
-</style> 
+
+// 添加单选框选中时的文字颜色样式
+:deep(.el-radio__input.is-checked + .el-radio__label) {
+  color: #333 !important;  // 使用与单选框圆圈相同的红色
+}
+
+// 如果需要修改单选框圆圈的颜色（如果当前不是您想要的红色）
+:deep(.el-radio__input.is-checked .el-radio__inner) {
+  border-color: #F56C6C !important;
+  background: #F56C6C !important;
+}
+
+// 添加鼠标悬停时的样式
+:deep(.el-radio) {
+  &:hover {
+    .el-radio__inner {
+      border-color: #F56C6C !important;
+    }
+    .el-radio__label {
+      color: #F56C6C !important;
+    }
+  }
+}
+
+// 修复错误信息被遮挡的问题
+:deep(.el-form-item) {
+  margin-bottom: 22px; // 增加表单项之间的间距
+  
+  .el-form-item__error {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 10; // 提高错误信息的层级
+    padding-top: 2px;
+    line-height: 1.2;
+    white-space: normal; // 允许错误信息换行
+    max-width: 100%; // 限制错误信息宽度
+    font-size: 10px; // 减小错误提示字体大小
+  }
+}
+
+// 对于文本域类型的表单项，增加更多的底部间距
+:deep(.el-form-item .el-textarea) {
+  & + .el-form-item__error {
+    top: calc(100% + 2px);
+  }
+}
+</style>

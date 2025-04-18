@@ -8,6 +8,9 @@ import './assets/styles/index.scss'; // global css
 import './permission'; // permission control
 import EventBus from '@/utils/event-bus';
 
+// Import SVG icons
+import '@/icons'
+
 // 引入自定义组件库
 import Components from '@/components'
 Object.keys(Components).forEach(key => {

@@ -16,6 +16,11 @@ export const constantRoutes = [
     component: () => import('@/views/error-page/404'),
     hidden: true
   },
+  // {
+  //   path: '/403',
+  //   component: () => import('@/views/error-page/403'),
+  //   hidden: true
+  // },
   {
     path: '/',
     component: Layout,
@@ -24,7 +29,7 @@ export const constantRoutes = [
       path: 'dashboard',
       name: 'Dashboard',
       component: () => import('@/views/dashboard/index'),
-      meta: { title: '首页', icon: 'el-icon-s-home' }
+      meta: { title: '首页', icon: 'dashboard' }
     }]
   }
 ];
@@ -36,7 +41,7 @@ export const asyncRoutes = [
     component: Layout,
     redirect: '/product/list',
     name: 'Product',
-    meta: { title: '产品管理', icon: 'el-icon-s-goods' },
+    meta: { title: '产品管理', icon: 'product' },
     children: [
       {
         path: 'list',
@@ -46,11 +51,9 @@ export const asyncRoutes = [
           title: '产品列表', 
           pageActionsConfig: {
             type: 'product',
-            actions: ['create', 'import', 'export', 'batchDelete'],
+            actions: ['create','batchDelete'],
             permissions: {
-              create: 'product:create',
-              import: 'product:import',
-              export: 'product:export',
+              create: 'product:create',             
               batchDelete: 'product:delete'
             }
           }
@@ -77,7 +80,7 @@ export const asyncRoutes = [
     component: Layout,
     redirect: '/device/list',
     name: 'Device',
-    meta: { title: '设备管理', icon: 'el-icon-cpu' },
+    meta: { title: '设备管理', icon: 'device' },
     children: [
       {
         path: 'list',
@@ -114,7 +117,7 @@ export const asyncRoutes = [
     component: Layout,
     name: 'DataForward',
     redirect: '/data-forward/index',
-    meta: { title: '数据转发', icon: 'el-icon-connection' },
+    meta: { title: '数据转发', icon: 'forward' },
     children: [
       {
         path: 'index',
@@ -129,7 +132,7 @@ export const asyncRoutes = [
     component: Layout,
     name: 'Params',
     redirect: '/params/index',
-    meta: { title: '参数设置', icon: 'el-icon-setting' },
+    meta: { title: '参数设置', icon: 'setting' },
     children: [
       {
         path: 'index',
@@ -144,7 +147,7 @@ export const asyncRoutes = [
     component: Layout,
     redirect: '/log/cloud',
     name: 'Log',
-    meta: { title: '日志管理', icon: 'el-icon-document' },
+    meta: { title: '日志管理', icon: 'log' },
     children: [
       {
         path: 'cloud',
@@ -171,7 +174,7 @@ export const asyncRoutes = [
     component: Layout,
     redirect: '/system/user',
     name: 'System',
-    meta: { title: '系统管理', icon: 'el-icon-s-tools' },
+    meta: { title: '系统管理', icon: 'system' },
     children: [
       {
         path: 'user',

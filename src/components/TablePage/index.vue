@@ -2,7 +2,7 @@
   <div class="table-page">
     <!-- 搜索区域 - 固定在顶部 -->
     <div class="search-wrapper">
-      <search-header ref="searchHeader" :search-items="searchItems" :search-model="searchModel" @search="handleSearch"
+      <search-header ref="searchHeader" v-if="searchItems.length" :search-items="searchItems" :search-model="searchModel" @search="handleSearch"
         @reset="handleReset">
         <template v-for="item in Object.keys(searchSlots)" v-slot:[item]="scope">
           <slot :name="item" v-bind="scope"></slot>
@@ -147,13 +147,23 @@ export default {
     searchItems() {
       this.searchSlots = this.getSearchSlots()
     },
-    columns() {
-      this.tableSlots = this.getTableSlots()
+    columns: {
+      handler() {
+        this.tableSlots = this.getTableSlots()
+        console.log('tableSlots updated:', this.tableSlots)
+      },
+      immediate: true,
+      deep: true
     }
   },
   mounted() {
     // 使用setTimeout延迟组件初始化，避免在动态路由切换时的问题
-
+    setTimeout(() => {
+      // 初始化插槽
+      this.searchSlots = this.getSearchSlots();
+      this.tableSlots = this.getTableSlots();
+      console.log('Initialized tableSlots:', this.tableSlots);
+    }, 300);
   },
   methods: {
     // 获取搜索区域的所有插槽
@@ -179,12 +189,15 @@ export default {
       const slots = {}
       // 处理表格中的自定义列插槽
       if (Array.isArray(this.columns)) {
+       
         this.columns.forEach(col => {
-          if (col && col.slotName) {
+          // 添加防御性检查，确保 col 是有效对象且有 slotName 属性
+          if (col && typeof col === 'object' && col.slotName) {
             slots[col.slotName] = true
           }
         })
       }
+      
       return slots
     },
     // 搜索事件
@@ -204,8 +217,9 @@ export default {
       this.$emit('update:limit', limit)
     },
     // 表格多选变化
-    handleSelectionChange(selection) {
-      this.$emit('selection-change', selection)
+    handleSelectionChange(selection) {      
+      const safeSelection = Array.isArray(selection) ? selection : [];
+      this.$emit('selection-change', safeSelection)
     },
     // 表格排序变化
     handleSortChange(column) {
