@@ -29,7 +29,7 @@
       </template>
     </table-page>
 
-    <global-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="550px"
+    <global-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="400px"
       custom-class="product-dialog" @confirm="dialogStatus === 'create' ? createData() : updateData()">
       <global-form ref="dataForm" :model="temp" :rules="rules" :form-items="formItems" label-width="100px"
         :show-footer="false" />
@@ -281,7 +281,7 @@ export default {
       })
     },
     handleDelete(row) {
-      this.$confirm('确认删除该产品?', '提示', {
+      this.$confirm(`确认是否删除该产品 ${row.name}?`, '删除产品', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'

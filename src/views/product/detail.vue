@@ -47,6 +47,7 @@
         </div>
         <!-- 功能定义 Tab -->
         <div v-else-if="activeTab === 'func'" class="tab-pane">
+          <FunctionDefinition />
         </div>
         <!-- 预置规则 Tab -->
         <div v-else-if="activeTab === 'rule'" class="tab-pane">
@@ -61,11 +62,13 @@ import EventBus from '@/utils/event-bus'
 import { getProduct } from '@/api/dm'
 import TopicList from './topic/topicList.vue'
 import CustomTopic from './topic/customTopic.vue'
+import FunctionDefinition from './func/index.vue'
 export default {
   name: 'ProductDetail',
   components: {
     TopicList,
-    CustomTopic
+    CustomTopic,
+    FunctionDefinition
   },
   data() {
     return {
@@ -79,71 +82,7 @@ export default {
         { name: 'rule', label: '预置规则' }
       ],
       activeTab: 'basic',
-      topicType: 1,
-      // 物模型数据
-      modelList: [
-        {
-          name: '温度',
-          identifier: 'temperature',
-          dataType: 'float',
-          accessMode: 'r',
-          min: -40,
-          max: 100,
-          step: 0.1,
-          unit: '℃'
-        },
-        {
-          name: '湿度',
-          identifier: 'humidity',
-          dataType: 'float',
-          accessMode: 'r',
-          min: 0,
-          max: 100,
-          step: 0.1,
-          unit: '%'
-        },
-        {
-          name: '工作模式',
-          identifier: 'mode',
-          dataType: 'enum',
-          accessMode: 'rw',
-          specs: {
-            '0': '自动',
-            '1': '制冷',
-            '2': '制热',
-            '3': '送风'
-          }
-        },
-        {
-          name: '开关状态',
-          identifier: 'power',
-          dataType: 'bool',
-          accessMode: 'rw',
-          specs: {
-            '0': '关',
-            '1': '开'
-          }
-        }
-      ],
-      // Topic数据
-      topicList: [
-        { function: '属性上报', topic: '/sys/a12BMOxFrnT/${deviceName}/thing/event/property/post', operation: '发布', description: '设备属性上报' },
-        { function: '属性上报响应', topic: '/sys/a12BMOxFrnT/${deviceName}/thing/event/property/post_reply', operation: '订阅', description: '云端响应属性上报' },
-        { function: '属性设置', topic: '/sys/a12BMOxFrnT/${deviceName}/thing/service/property/set', operation: '订阅', description: '设备属性设置' },
-        { function: '事件上报', topic: '/sys/a12BMOxFrnT/${deviceName}/thing/event/${tsl.event.identifier}/post', operation: '发布', description: '设备事件上报' },
-        { function: '事件上报响应', topic: '/sys/a12BMOxFrnT/${deviceName}/thing/event/${tsl.event.identifier}/post_reply', operation: '订阅', description: '云端响应事件上报' },
-        { function: '服务调用', topic: '/sys/a12BMOxFrnT/${deviceName}/thing/service/${tsl.service.identifier}', operation: '发布', description: '设备服务调用' },
-        { function: '服务调用响应', topic: '/sys/a12BMOxFrnT/${deviceName}/thing/service/${tsl.service.identifier}_reply', operation: '订阅', description: '设备响应服务调用' }
-      ],
-      // 产品配置描述项
-      productConfigItems: [
-        { label: '节点类型', value: '设备' },
-        { label: '连接协议', value: 'MQTT' },
-        { label: '认证方式', value: '设备密钥认证' },
-        { label: '数据格式', value: 'JSON' },
-        { label: '是否接入网关', value: '否' },
-        { label: '自动定位', value: '否' }
-      ],
+      topicType: 1,  
     }
   },
   computed: {

@@ -174,6 +174,17 @@
         @change="(val) => handleInputChange(val, item)"
       ></el-input>
       
+      <!-- 没有输入是个点击按钮 -->
+      <div v-else-if="item.type === 'input-button'" class="input-with-button">        
+        <el-button
+          type="text"
+          style="margin-left: 8px"
+          @click="() => handleButtonClick(item)"
+          icon="el-icon-plus" 
+          size="mini"         
+        >{{ item.btnText }}</el-button>
+      </div>
+      
       <!-- 自定义插槽 -->
       <slot v-else :name="`form-item-${item.prop}`" :item="item"></slot>
     </el-form-item>
@@ -356,6 +367,10 @@ export default {
     // 数字变化事件
     handleNumberChange(val, item) {
       this.$emit('number-change', val, item.prop, item)
+    },
+    // 按钮点击事件
+    handleButtonClick(item) {
+      this.$emit('button-click', item)
     }
   }
 }
@@ -431,4 +446,5 @@ export default {
     top: calc(100% + 2px);
   }
 }
+
 </style>
