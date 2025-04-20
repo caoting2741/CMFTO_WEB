@@ -75,12 +75,12 @@ export default {
       selectedRows: [],
       // 表格列配置
       columns: [
-        { prop: 'name', label: '产品名称', minWidth: 150, slotName: 'name' },
-        { prop: 'product_key', label: '产品Key', minWidth: 150 },
-        { prop: 'device_count', label: '设备数量', minWidth: 120 },
-        { prop: 'type', label: '产品类型', minWidth: 120, slotName: 'type' },
-        { prop: 'status', label: '产品状态', minWidth: 100, slotName: 'status' },
-        { prop: 'create_at', label: '创建时间', minWidth: 180 }
+        { prop: 'name', label: '产品名称',  slotName: 'name' },
+        { prop: 'product_key', label: '产品Key' },
+        { prop: 'device_count', label: '设备数量' },
+        { prop: 'type', label: '产品类型', slotName: 'type' },
+        { prop: 'status', label: '产品状态',  slotName: 'status' },
+        { prop: 'create_at', label: '创建时间' }
       ],
       // 搜索项配置
       searchItems: [
@@ -281,7 +281,7 @@ export default {
       })
     },
     handleDelete(row) {
-      this.$confirm(`确认是否删除该产品 ${row.name}?`, '删除产品', {
+      this.$confirm(`确认是否删除产品：${row.name}?`, '删除产品', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -339,7 +339,7 @@ export default {
       }).then( async () => {
         // 批量删除
         let data = []
-        this.selectedRows.forEach((item, index) => {
+        this.selectedRows.forEach((item) => {
           data.push({ id: item.id, product_key: item.product_key, name: item.name })
         })
         await deleteProducts(data)

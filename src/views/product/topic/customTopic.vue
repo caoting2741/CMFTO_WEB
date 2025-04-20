@@ -6,7 +6,7 @@
         <el-button type="text" @click="handleAdd" icon="el-icon-plus">创建</el-button>
       </div>
     </div>
-    <table-page :table-data="tableData" :columns="columns" :loading="loading" :show-selection="false"
+    <table-page :table-data="tableData" height="calc(85vh-74px)" :columns="columns" :loading="loading" :show-selection="false"
       :show-index="false" :show-operation="true" :row-key="'topicDefinition'" :show-footer="false"
       :showPagination="false">
       <!-- 是否开启代理订阅 -->
@@ -193,7 +193,7 @@ export default {
       this.dialogFormVisible = true
     },
     handleDelete(row) {      
-      this.$confirm(`确认是否删除该Topic类 ${row.topic}?`, '删除Topic类', {
+      this.$confirm(`确认是否删除Topic类：${row.topic}?`, '删除Topic类', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning' 

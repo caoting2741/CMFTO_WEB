@@ -53,6 +53,11 @@
 export default {
   name: 'TablePage',
   props: {
+    // 组件高度
+    height: {
+      type: String,
+      default: 'calc(95vh - 74px)'
+    },
     // 表格数据
     tableData: {
       type: Array,
@@ -267,9 +272,9 @@ export default {
 .table-page {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 84px);
+  height: v-bind(height);
   position: relative;
-  /* 减去头部导航的高度 */
+  /* 可自定义高度 */
 
   .search-wrapper {
     flex: 0 0 auto;    
