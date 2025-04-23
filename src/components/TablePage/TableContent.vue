@@ -27,11 +27,11 @@
               <el-tag
                 :type="column.tagType ? (typeof column.tagType === 'function' ? column.tagType(scope.row) : column.tagType) : ''"
                 :effect="column.tagEffect || 'light'">
-                {{ scope.row[column.prop] }}
+                {{ scope.row[column?.prop] ?? '' }}
               </el-tag>
             </template>
             <template v-else>
-              {{ column.prop && scope.row ? scope.row[column.prop] : '' }}
+              {{ column?.prop && scope.row ? scope.row[column.prop] ?? '' : '' }}
             </template>
           </template>
         </el-table-column>
@@ -213,7 +213,10 @@ export default {
     // 默认排序
     defaultSort: {
       type: Object,
-      default: null
+      default: () => ({
+        prop: '',
+        order: 'ascending'
+      })
     },
     // 每页条数
     pageSize: {
@@ -242,19 +245,30 @@ export default {
   },
   computed: {
     // 提供一个安全的列配置，确保不会有null或undefined
-    safeColumns() {
-      if (!Array.isArray(this.columns) || this.columns.length === 0) {
-        // 如果列为空，返回默认列
-        return [{ prop: 'id', label: 'ID' }];
-      }
+    // safeColumns() {
+    //   if (!Array.isArray(this.columns) || this.columns.length === 0) {
+    //     // 如果列为空，返回默认列
+    //     return [{ prop: 'id', label: 'ID' }];
+    //   }
 
-      // 过滤和修复列配置
-      return this.columns.filter(column => column && typeof column === 'object')
-        .map(column => ({
-          ...column,
-          label: column.label || '',  // 确保label有值
-          prop: column.prop || `col-${Math.random().toString(36).substr(2, 9)}` // 确保prop有值
-        }));
+    //   // 过滤和修复列配置
+    //   return this.columns.filter(column => column && typeof column === 'object')
+    //     .map(column => ({
+    //       ...column,
+    //       label: column.label || '',  // 确保label有值
+    //       prop: column.prop || `col-${Math.random().toString(36).substr(2, 9)}` // 确保prop有值
+    //     }));
+    // },
+    safeColumns() {
+      return (this.columns || [])
+        .filter(col => !!col && typeof col === 'object')
+        .map((col, index) => ({
+          ...col,
+          prop: col.prop || `col-${index}-${Date.now()}`,
+          label: col.label || `列${index + 1}`,
+          minWidth: col.minWidth || '100px',
+          align: col.align || 'center'
+        }))
     },
 
     // 动态计算操作列宽度，根据使用情况自动调整
@@ -279,20 +293,25 @@ export default {
       handler(newColumns) {
         //console.log('TableContent columns changed:', newColumns);
         // 当列配置变化时，延迟更新内部列配置
+        // this.$nextTick(() => {
+        //   if (this.validateColumns(newColumns)) {
+        //     this.internalColumns = [...newColumns];
+        //     // 确保DOM更新后再渲染表格
+        //     this.$nextTick(() => {
+        //       this.shouldRenderTable = true;
+        //     });
+        //   } else {
+        //     console.warn('TableContent: 提供了无效的列配置，将使用默认列', newColumns);
+        //     // 使用默认安全列配置
+        //     this.internalColumns = [{ prop: 'id', label: 'ID', align: 'center' }];
+        //     this.shouldRenderTable = true;
+        //   }
+        // });
+        this.internalColumns = this.safeColumns
         this.$nextTick(() => {
-          if (this.validateColumns(newColumns)) {
-            this.internalColumns = [...newColumns];
-            // 确保DOM更新后再渲染表格
-            this.$nextTick(() => {
-              this.shouldRenderTable = true;
-            });
-          } else {
-            console.warn('TableContent: 提供了无效的列配置，将使用默认列', newColumns);
-            // 使用默认安全列配置
-            this.internalColumns = [{ prop: 'id', label: 'ID', align: 'center' }];
-            this.shouldRenderTable = true;
-          }
-        });
+          this.shouldRenderTable = true
+          this.fixTableScrollSync()
+        })
       },
       immediate: true,
       deep: true
@@ -301,13 +320,14 @@ export default {
   created() {
     // 延迟表格渲染，避免路由切换期间的问题
     setTimeout(() => {
-      if (this.validateColumns(this.columns)) {
-        this.internalColumns = [...this.columns];
-      } else {
-        //console.warn('TableContent: 提供了无效的列配置，将使用默认列', this.columns);
-        // 使用默认安全列配置
-        this.internalColumns = [{ prop: 'id', label: 'ID', align: 'center' }];
-      }
+      // if (this.validateColumns(this.columns)) {
+      //   this.internalColumns = [...this.columns];
+      // } else {
+      //   //console.warn('TableContent: 提供了无效的列配置，将使用默认列', this.columns);
+      //   // 使用默认安全列配置
+      //   this.internalColumns = [{ prop: 'id', label: 'ID', align: 'center' }];
+      // }
+      this.internalColumns = this.safeColumns;  // 改用安全列配置
       this.shouldRenderTable = true;
     }, 300);
   },
@@ -360,14 +380,14 @@ export default {
       // 检查每个列对象是否有效
       for (let i = 0; i < columns.length; i++) {
         const col = columns[i];
-        // 如果列为null或非对象，直接返回false
-        if (!col || typeof col !== 'object') {
-          return false;
-        }
-
-        // 针对非插槽和非渲染函数的列，必须有有效的prop属性
+        // 加强prop验证
         if (!col.slotName && !col.render) {
-          if (!col.prop || typeof col.prop !== 'string') {
+          if (
+            !col.prop ||
+            typeof col.prop !== 'string' ||
+            col.prop.trim() === ''  // 新增空字符串检查
+          ) {
+            console.error(`无效列配置，索引 ${i}:`, col);
             return false;
           }
         }

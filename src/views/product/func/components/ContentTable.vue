@@ -30,10 +30,10 @@
         @button-click="handleParamButtonClick" @radio-change="handleRadioChange">
         <template #form-item-rangeItem="{ item }">
           <div class="range-container">
-            <el-input v-model="customFuncForm.min" @blur="handleRangeInputBlur" placeholder="最小值"
+            <el-input v-model="customFuncForm.min"   placeholder="最小值"
               class="range-input"></el-input>
             <span class="range-separator">~</span>
-            <el-input v-model="customFuncForm.max" @blur="handleRangeInputBlur" placeholder="最大值"
+            <el-input v-model="customFuncForm.max" placeholder="最大值"
               class="range-input"></el-input>
           </div>
         </template>
@@ -198,6 +198,7 @@
 </template>
 
 <script>
+import { conforms } from 'lodash';
 import { cloneDeep } from 'lodash';
 export default {
   name: 'ContentTable',
@@ -467,7 +468,12 @@ export default {
       },
       paramDialogTitle: '',
       advanceType: '',
-      btnType: ''
+      btnType: '',
+      paramIndex: '',
+      // 添加用于临时保存基本信息的对象
+      basicInfoBackup: {},
+      // 添加用于临时保存高级信息的对象
+      advancedInfoBackup: {},
     }
   },
   computed: {
@@ -514,6 +520,7 @@ export default {
           required: true
         })
         if (this.customFuncForm.dataType === 'int32' || this.customFuncForm.dataType === 'float' || this.customFuncForm.dataType === 'double') {
+
           baseItems.push(
             {
               label: '取值范围',
@@ -678,6 +685,7 @@ export default {
         }
       ]
       if (this.advancedForm.dataType === 'int32' || this.advancedForm.dataType === 'float' || this.advancedForm.dataType === 'double') {
+
         bsItems.push(
           {
             label: '取值范围',
@@ -815,6 +823,9 @@ export default {
     handleRadioChange(val, type) {
       if (type == 'modelType') {
         this.customFuncForm.modelType = val
+        this.customFuncForm.params = []
+        this.customFuncForm.inputParams = []
+        this.customFuncForm.outputParams = []
         this.$refs.customFuncForm.clearValidate();
       }
     },
@@ -829,8 +840,10 @@ export default {
         this.advancedForm = this.$refs.advancedForm.getFormData()
         this.$refs.advancedForm.clearValidate();
       }
-    },
-    validateRange(callback, formRef = 'customFuncForm') {
+    },    
+
+    validateRange(callback, formRef = 'customFuncForm') {  
+      console.log(3434343434)
       // 获取当前数据类型
       const dataType = this[formRef].dataType;
       // 获取表单中的最小值和最大值
@@ -1089,15 +1102,12 @@ export default {
     },
     // 修改表单项中input的blur事件处理
     handleRangeInputBlur() {
-      // 获取表单数据但不直接替换整个对象
-      const formData = this.$refs.customFuncForm.getFormData();
-
-      // 只更新需要的字段
-      this.customFuncForm.min = formData.min;
-      this.customFuncForm.max = formData.max;
-
-      // 验证
-      this.$refs.customFuncForm.validateField('rangeItem');
+      // 获取表单数据但不直接替换整个对象     
+      console.log(54545454)
+      console.log(this.$refs.customFuncForm.getFormData())
+      // this.$refs.customFuncForm.validateField('rangeItem');
+      // this.customFuncForm.name = this.basicInfoBackup.name;
+      // this.customFuncForm.identifier = this.basicInfoBackup.identifier;
     },
     handleAdvBoolInputBlur() {
       // 触发boolItem的验证
@@ -1131,6 +1141,8 @@ export default {
       this.advanceType = type
       this.btnType = 'addP'
       this.paramDialogTitle = '添加参数';
+      this.basicInfoBackup = {}
+      this.basicInfoBackup = cloneDeep(this.$refs.customFuncForm.getFormData())
       this.advancedForm = {
         name: '',
         identifier: '',
@@ -1149,6 +1161,9 @@ export default {
     editParam(index, type) {
       this.advanceType = type
       this.btnType = 'editP'
+      this.paramIndex = index
+      this.basicInfoBackup = {}
+      this.basicInfoBackup = cloneDeep(this.$refs.customFuncForm.getFormData())
       let param = {}
       if (this.advanceType === 'params') {
         param = cloneDeep(this.customFuncForm.params[index])
@@ -1174,7 +1189,6 @@ export default {
       if (this.advanceType == 'outputParams') {
         this.customFuncForm.outputParams.splice(index, 1)
       }
-
     },
     handleSearch(params) {
       this.$emit('search', params)
@@ -1201,24 +1215,23 @@ export default {
       this.$refs.advancedForm.validate(async (valid) => {
         if (valid) {
           const data = this.$refs.advancedForm.getFormData()
-          // 检查是否存在同名参数
-          const isDuplicate = this.btnType === 'addP' ? this.customFuncForm.params.some(param =>
+          // 检查是否存在同名参数      
+          const isDuplicate = this.btnType == 'addP' ? this.customFuncForm.params.some(param =>
             param.name === data.name || param.identifier === data.identifier
           ) : false;
           if (isDuplicate) {
             this.$message.error('已存在相同名称或标识符的参数，请修改后重试');
             return;
           }
+          if (this.btnType == 'editP') {
+            this.customFuncForm[this.advanceType].splice(this.paramIndex, 1, JSON.parse(JSON.stringify(data)))
+          }
+          if (this.btnType == 'addP') {
+            this.customFuncForm[this.advanceType].push(JSON.parse(JSON.stringify(data)))
+          }
 
-          if (this.advanceType === 'params') {
-            this.customFuncForm.params.push(JSON.parse(JSON.stringify(data)))
-          }
-          if (this.advanceType === 'inputParams') {
-            this.customFuncForm.inputParams.push(JSON.parse(JSON.stringify(data)))
-          }
-          if (this.advanceType === 'outputParams') {
-            this.customFuncForm.outputParams.push(JSON.parse(JSON.stringify(data)))
-          }
+          this.customFuncForm.name = this.basicInfoBackup.name
+          this.customFuncForm.identifier = this.basicInfoBackup.identifier
 
           this.advancedDialogVisible = false
 

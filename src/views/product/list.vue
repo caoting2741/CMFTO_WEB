@@ -80,7 +80,7 @@ export default {
         { prop: 'device_count', label: '设备数量' },
         { prop: 'type', label: '产品类型', slotName: 'type' },
         { prop: 'status', label: '产品状态',  slotName: 'status' },
-        { prop: 'create_at', label: '创建时间' }
+        { prop: 'create_at', label: '创建时间',width:180 }
       ],
       // 搜索项配置
       searchItems: [

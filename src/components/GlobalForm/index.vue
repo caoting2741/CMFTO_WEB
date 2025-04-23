@@ -210,7 +210,9 @@ export default {
   watch: {
     model: {
       handler(val) {
+        console.log('model changed', val)        
         this.formData = { ...val }
+        
       },
       deep: true
     }
@@ -257,7 +259,7 @@ export default {
       this.formData = { ...this.formData, ...data }
     },
     // 输入框变化事件
-    handleInputChange(val, item) {
+    handleInputChange(val, item) {      
       this.$emit('input-change', val, item.prop, item)
     },
     // 选择框变化事件

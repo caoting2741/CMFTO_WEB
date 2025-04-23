@@ -139,7 +139,7 @@ export default {
       this.$router.push('/product/list')
     },
     // 返回上一页
-    goBack() {
+    goBack() {   
       this.$router.push('/product/list')
     },
     // 切换显示/隐藏密钥

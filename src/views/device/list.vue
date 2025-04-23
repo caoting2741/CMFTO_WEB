@@ -1,34 +1,27 @@
 <template>
   <div class="app-container">
-    <table-page
-      :table-data="list"
-      :columns="columns"
-      :search-items="searchItems"
-      :search-model="searchModel"
-      :loading="listLoading"
-      :total="total"
-      :page.sync="listQuery.page"
-      :limit.sync="listQuery.limit"
-      @search="handleSearch"
-      @reset="handleReset"
-      @pagination="getList"
-    >
-      <!-- 操作按钮插槽 -->
-      <template #operation-buttons>
-        <el-button type="primary" icon="el-icon-plus" @click="handleCreate">添加</el-button>
-      </template>
+    <table-page :table-data="list" :columns="columns" :search-items="searchItems" :search-model="searchModel"
+      :loading="listLoading" :total="total" :page.sync="listQuery._page" :limit.sync="listQuery._limit"
+      @search="handleSearch" :show-selection="true" @reset="handleReset" @pagination="getList"
+      @selection-change="handleSelectionChange">
 
       <!-- 设备名称列插槽 -->
       <template #name="{ row }">
-        <router-link :to="'/device/detail/'+row.id" class="link-type">
+        <router-link :to="'/device/detail/' + row.id" class="link-type">
           <span>{{ row.name }}</span>
         </router-link>
       </template>
-      
+
+      <!-- 上次断开时间 -->
+      <template #last_disconnected_at="{ row }">
+        {{ row.status ? '' : row.disconnected_at }}
+      </template>
+
       <!-- 在线状态列插槽 -->
       <template #status="{ row }">
-        <el-tag :type="row.status | statusFilter">{{ row.status === 'online' ? '在线' : '离线' }}</el-tag>
+        <el-tag :type="row.status | statusFilter">{{ row.status === true ? '在线' : '离线' }}</el-tag>
       </template>
+
 
       <!-- 操作列插槽 -->
       <template #operation="{ row }">
@@ -38,145 +31,118 @@
       </template>
     </table-page>
 
-    <global-dialog 
-      :title="textMap[dialogStatus]" 
-      :visible.sync="dialogFormVisible" 
-      width="550px"
-      custom-class="device-dialog"
-      @confirm="dialogStatus==='create'?createData():updateData()"
-    >
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 85%; margin: 0 auto;">
-        <el-form-item label="设备名称" prop="name">
-          <el-input v-model="temp.name" />
-        </el-form-item>
-        <el-form-item label="所属产品" prop="productId">
-          <el-select v-model="temp.productId" class="filter-item" placeholder="请选择">
-            <el-option v-for="item in productOptions" :key="item.id" :label="item.name" :value="item.id" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="设备编号" prop="sn">
-          <el-input v-model="temp.sn" />
-        </el-form-item>
-        <el-form-item label="描述">
-          <el-input v-model="temp.desc" :autosize="{ minRows: 2, maxRows: 4}" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-      </el-form>
-    </global-dialog>
+    <add-edit-dialog :dialog-form-visible.sync="dialogFormVisible" :dialog-status="dialogStatus" :temp="temp"
+      :product-options="productOptions" @view-location="handleViewLocation" @create="createData" @update="updateData" />
+
   </div>
 </template>
 
 <script>
 import EventBus, { PAGE_ACTION_EVENTS } from '@/utils/event-bus'
-import GlobalDialog from '@/components/GlobalDialog'
+import AddEditDialog from './components/AddEditDialog.vue'
+import {
+  loadDevices,
+  enableDevice,
+  statsDevice,
+  getStatsDevice,
+  traceDevice,
+  getDevicesByProductId,
+  deleteDevice,
+  uploadDevice,
+  downloadDevices,
+  loadAllProducts,
+  deleteDevices,
+} from '@/api/dm'
 
 export default {
   name: 'DeviceList',
   // 为面包屑添加页面操作按钮
   components: {
-    GlobalDialog
+    AddEditDialog
   },
+
   filters: {
     statusFilter(status) {
       const statusMap = {
-        online: 'success',
-        offline: 'info'
+        true: 'success',
+        false: 'error'
       }
       return statusMap[status]
     }
   },
   data() {
     return {
-      list: [
-        { id: 1001, name: '客厅温控器', productId: 1, productName: '智能温控器', sn: 'TC0010001', status: 'online', activeTime: '2023-06-10 09:32:15', desc: '客厅温控器设备' },
-        { id: 1002, name: '卧室温控器', productId: 1, productName: '智能温控器', sn: 'TC0010002', status: 'online', activeTime: '2023-06-10 08:15:42', desc: '卧室温控器设备' },
-        { id: 1003, name: '书房温控器', productId: 1, productName: '智能温控器', sn: 'TC0010003', status: 'offline', activeTime: '2023-06-09 18:45:27', desc: '书房温控器设备' },
-        { id: 1004, name: '客厅门锁', productId: 2, productName: '智能门锁', sn: 'DL0020001', status: 'online', activeTime: '2023-06-10 10:05:33', desc: '客厅门锁设备' },
-        { id: 1005, name: '前门门锁', productId: 2, productName: '智能门锁', sn: 'DL0020002', status: 'offline', activeTime: '2023-06-09 20:12:56', desc: '前门门锁设备' },
-        { id: 1006, name: '卧室空气检测仪', productId: 3, productName: '环境监测器', sn: 'AM0030001', status: 'online', activeTime: '2023-06-10 08:55:19', desc: '卧室空气检测仪设备' }
-      ],
-      total: 6,
+      list: [],
+      total: 0,
       listLoading: false,
       listQuery: {
-        page: 1,
-        limit: 10,
-        name: '',
+        _page: 1,
+        _limit: 20,
+        device_name: '',
         status: '',
-        productId: ''
+        product_key: ''
       },
       // 表格列配置
       columns: [
-        { prop: 'id', label: '设备ID', width: 100, align: 'center' },
-        { prop: 'name', label: '设备名称', minWidth: 150, slotName: 'name' },
-        { prop: 'productName', label: '所属产品', minWidth: 120 },
-        { prop: 'sn', label: '设备编号', minWidth: 120 },
-        { prop: 'status', label: '在线状态', minWidth: 100, slotName: 'status' },
-        { prop: 'activeTime', label: '激活时间', minWidth: 180 }
+        { prop: 'id', label: '名称', slotName: 'name' },
+        { prop: 'nickname', label: '昵称', width: 180 },
+        { prop: 'status', label: '状态', slotName: 'status' },
+        { prop: 'connected_at', label: '连接时间', width: 180 },
+        { prop: 'disconnected_at', label: '断开时间', width: 180 },
+        { prop: 'last_disconnected_at', label: '上次断开时间', width: 180, slotName: 'last_disconnected_at' },
+        { prop: 'online_at', label: '在线时长', width: 180 },
+        { prop: 'offline_at', label: '离线时长', width: 180 }
       ],
       // 搜索项配置
       searchItems: [
         { label: '设备名称', prop: 'name', type: 'input' },
-        { 
-          label: '在线状态', 
-          prop: 'status', 
+        {
+          label: '设备状态',
+          prop: 'status',
           type: 'select',
           options: [
-            { label: '离线', value: 'offline' },
-            { label: '在线', value: 'online' }
+            { label: '离线', value: false },
+            { label: '在线', value: true }
           ]
         },
-        { 
-          label: '所属产品', 
-          prop: 'productId', 
+        {
+          label: '所属产品',
+          prop: 'product_key',
           type: 'select',
-          options: [
-            { label: '智能温控器', value: 1 },
-            { label: '智能门锁', value: 2 },
-            { label: '环境监测器', value: 3 },
-            { label: '智能插座', value: 4 },
-            { label: '智能灯具', value: 5 }
-          ]
+          options: []
         }
       ],
       // 搜索表单值
       searchModel: {
-        name: '',
+        device_name: '',
         status: '',
-        productId: ''
+        product_key: ''
       },
       statusOptions: [
-        { label: '离线', value: 'offline' },
-        { label: '在线', value: 'online' }
+        { label: '离线', value: false },
+        { label: '在线', value: true }
       ],
-      productOptions: [
-        { id: 1, name: '智能温控器' },
-        { id: 2, name: '智能门锁' },
-        { id: 3, name: '环境监测器' },
-        { id: 4, name: '智能插座' },
-        { id: 5, name: '智能灯具' }
-      ],
+      productOptions: [],
       temp: {
         id: undefined,
         name: '',
         productId: '',
         sn: '',
-        status: 'offline',
-        desc: ''
+        desc: '',
+        devTags: [],
+        coordinate: '',
+        locDesc: '',
       },
       dialogFormVisible: false,
       dialogStatus: '',
-      textMap: {
-        update: '编辑设备',
-        create: '创建设备'
-      },
-      rules: {
-        name: [{ required: true, message: '设备名称必填', trigger: 'blur' }],
-        productId: [{ required: true, message: '所属产品必选', trigger: 'change' }],
-        sn: [{ required: true, message: '设备编号必填', trigger: 'blur' }]
-      }
     }
   },
+  computed: {
+    
+  },
   created() {
-    this.getList()
+    this.getList();
+    this.getProductList();
     // 监听页面操作事件
     this.setupEventListeners()
   },
@@ -185,62 +151,114 @@ export default {
     this.removeEventListeners()
   },
   methods: {
-    getList() {
+    async getList() {
       this.listLoading = true
-      // 这里应该调用API获取数据，现在使用模拟数据
-      // fetchList(this.listQuery).then(response => {
-      //   this.list = response.data.items
-      //   this.total = response.data.total
-      //   this.listLoading = false
-      // })
-      setTimeout(() => {
+      try {
+        // 过滤掉值为空的查询参数
+        const query = Object.entries(this.listQuery).reduce((acc, [key, value]) => {
+          if (value !== '' && value !== null && value !== undefined) {
+            acc[key] = value;
+          }
+          return acc;
+        }, {});
+        const { items, meta } = await loadDevices(query)
+        this.list = items || []
+        this.total = meta?.count || 0
+      } catch (error) {
+        console.error('获取设备列表失败:', error)
+        this.list = []
+        this.total = 0
+      } finally {
         this.listLoading = false
-      }, 500)
+      }
+    },
+    async getProductList() {
+      let arr = await loadAllProducts() || []
+      if (arr.length > 0) {
+        const mappedOptions = arr.map(item => ({
+          label: item.name,
+          value: item.product_key
+        }))
+        this.productOptions = mappedOptions
+        this.searchItems[2].options = mappedOptions
+      }
     },
     // 更新搜索方法
     handleSearch(form) {
-      this.listQuery.name = form.name
+      this.listQuery.device_name = form.name
       this.listQuery.status = form.status
-      this.listQuery.productId = form.productId
-      this.listQuery.page = 1
+      this.listQuery.product_key = form.productId
+      this.listQuery._page = 1
       this.getList()
     },
     // 重置方法
     handleReset() {
       this.searchModel = {
-        name: '',
+        device_name: '',
         status: '',
-        productId: ''
+        product_key: ''
       }
-      this.listQuery.page = 1
+      this.listQuery = {
+        _page: 1,
+        device_name: '',
+        status: '',
+        product_key: ''
+      }
       this.getList()
+    },
+    // 选择变化处理方法
+    handleSelectionChange(selection) {
+      // 确保 selection 是数组
+      this.selectedRows = Array.isArray(selection) ? selection : [];
+
+      try {
+        // 使用直接的字符串常量作为事件名称，避免使用可能导致问题的常量
+        const directEventName = 'selection_change';
+
+        // 创建一个简单的对象，避免任何可能的字符串操作
+        const data = {
+          type: 'device',
+          count: this.selectedRows.length
+        };
+        // 直接使用字符串事件名称
+        EventBus.$emit(directEventName, data);
+
+      } catch (error) {
+        console.error('事件发送错误:', error);
+      }
+    },
+    handleViewLocation() {
+      // 调用地图组件的方法，传入设备的经纬度信息
+      //this.$refs.mapComponent.showDeviceLocation(this.temp.coordinate);
     },
     resetTemp() {
       this.temp = {
         id: undefined,
         name: '',
-        productId: '',
-        sn: '',
-        status: 'offline',
-        desc: ''
+        product_key: '',
+        deviceSercet: '',
+        desc: '',
+        devTags: [],
+        coordinate: '',
+        locDesc: ''
       }
     },
     handleCreate() {
       this.resetTemp()
+      this.devTags = []
       this.dialogStatus = 'create'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
+      this.dialogFormVisible = true      
     },
+    
+
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           this.temp.id = this.list.length + 1000
-          this.temp.activeTime = new Date().toLocaleString()
+          //this.temp.activeTime = new Date().toLocaleString()
           const productObj = this.productOptions.find(item => item.id === this.temp.productId)
           this.temp.productName = productObj ? productObj.name : ''
-          
+
           // createDevice(this.temp).then(() => {
           //   this.list.unshift(this.temp)
           //   this.dialogFormVisible = false
@@ -276,7 +294,7 @@ export default {
           const tempData = Object.assign({}, this.temp)
           const productObj = this.productOptions.find(item => item.id === tempData.productId)
           tempData.productName = productObj ? productObj.name : ''
-          
+
           // updateDevice(tempData).then(() => {
           //   const index = this.list.findIndex(v => v.id === this.temp.id)
           //   this.list.splice(index, 1, tempData)
@@ -360,11 +378,31 @@ export default {
         type: 'success'
       })
     },
+
     handleBatchDelete() {
-      this.$message({
-        message: '批量删除功能示例',
+      if (this.selectedRows.length === 0) {
+        this.$message.warning('请选择要删除的设备')
+        return
+      }
+      this.$confirm('确认删除选中设备?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
         type: 'warning'
+      }).then(async () => {
+        // 批量删除
+        let data = []
+        this.selectedRows.forEach((item) => {
+          data.push({ id: item.id, product_key: item.product_key, name: item.name })
+        })
+        // await deleteProducts(data)
+        this.$notify({
+          title: '成功',
+          message: '删除成功',
+          type: 'success',
+        })
+        this.getList()
       })
+
     }
   }
 }
@@ -374,6 +412,7 @@ export default {
 .app-container {
   padding: 0;
 }
+
 .link-type {
   color: #067288;
 }
@@ -384,4 +423,44 @@ export default {
     width: 100%;
   }
 }
-</style> 
+
+.loc-container {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  .coordinate-input {
+    width: 180px;
+  }
+
+  .loc-desc-input {
+    flex: 1;
+  }
+}
+
+.dev-tags-container {
+  .tags-list {
+    .tag-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      align-items: flex-start;
+
+      .tag-input-container {
+        flex: 1;
+
+        .tag-error {
+          color: #F56C6C;
+          font-size: 12px;
+          margin-top: 4px;
+          line-height: 1;
+        }
+      }
+    }
+  }
+
+  .add-tag {
+    margin-top: 8px;
+  }
+}
+</style>

@@ -28,7 +28,7 @@ export default {
       // 根据不同操作触发不同事件
       switch(action) {
         case 'back':
-          EventBus.$emit('product-detail:edit', productId)
+          EventBus.$emit('product-detail:back', productId)
           break
         
       }

@@ -536,3 +536,8 @@ div:focus {
   background-color: #f5f7fa !important;
   border-color: #e4e7ed !important;
 }
+.el-button--primary.is-plain {
+  color: $blue!important;
+  border-color: $blue!important;
+  background-color: #fff!important;
+}
